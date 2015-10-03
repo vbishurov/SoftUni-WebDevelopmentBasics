@@ -7,4 +7,8 @@ abstract class Controller
     {
         return isset($_SESSION['id']);
     }
+
+    public function getUserId() {
+        return $_SESSION['id'];
+    }
 }

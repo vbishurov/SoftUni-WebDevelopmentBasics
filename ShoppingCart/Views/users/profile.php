@@ -1,6 +1,5 @@
 <h1>Hello, <?= $model->getFirstName(); ?> <?= $model->getLastName(); ?> (<?= $model->getUsername(); ?>)</h1>
 <h3>
-    Resources:
     <p>Cash: <?= $model->getCash(); ?></p>
 </h3>
 
@@ -23,3 +22,5 @@
         <a href="logout">Logout</a>
     </div>
 </form>
+
+<a href="/products/all">View available products</a>

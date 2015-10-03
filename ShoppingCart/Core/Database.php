@@ -32,7 +32,6 @@ class Database
 
     public function prepare($statement, array $driverOptions = []) {
         $statement = $this->db->prepare($statement, $driverOptions);
-
         return new Statement($statement);
     }
 
@@ -42,5 +41,21 @@ class Database
 
     public function lastId($name = null) {
         return $this->db->lastInsertId($name);
+    }
+
+    public function setAttribute($attribute, $value) {
+        return $this->db->setAttribute($attribute, $value);
+    }
+
+    public function beginTransaction () {
+        return $this->db->beginTransaction();
+    }
+
+    public function commit() {
+        return $this->db->commit();
+    }
+
+    public function rollBack  () {
+        return $this->db->rollBack();
     }
 }

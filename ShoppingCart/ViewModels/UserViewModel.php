@@ -1,7 +1,7 @@
 <?php
 namespace ShoppingCart\ViewModels;
 
-class User
+class UserViewModel
 {
     private $id;
     private $username;

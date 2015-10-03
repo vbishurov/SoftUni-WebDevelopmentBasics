@@ -1,8 +1,7 @@
 <?php
-
 namespace ShoppingCart\ViewModels;
 
-class LoginInformation
+class ProductAddInformationViewModel
 {
     public $error = false;
     public $success = false;

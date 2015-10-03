@@ -1,24 +1,21 @@
 <?php
 namespace ShoppingCart\Controllers;
 
-use ShoppingCart\Models\User;
+use ShoppingCart\Models\UserModel;
 use ShoppingCart\View;
-use ShoppingCart\ViewModels\LoginInformation;
-use ShoppingCart\ViewModels\RegisterInformation;
+use ShoppingCart\ViewModels\LoginInformationViewModel;
+use ShoppingCart\ViewModels\RegisterInformationViewModel;
+use ShoppingCart\ViewModels\UserViewModel;
 
 class UsersController extends Controller
 {
     public function login() {
         if ($this->isLogged()) {
-            if ($_SERVER['REQUEST_URI'] == "/") {
-                header("Location: users/profile");
-            } else {
-                header("Location: profile");
-            }
+            header("Location: /users/profile");
             exit();
         }
 
-        $viewModel = new LoginInformation();
+        $viewModel = new LoginInformationViewModel();
 
         if (isset($_POST['username'], $_POST['password'])) {
             try {
@@ -35,25 +32,13 @@ class UsersController extends Controller
         return new View($viewModel);
     }
 
-    private function initLogin($user, $pass) {
-        $userModel = new User();
-
-        $userId = $userModel->login($user, $pass);
-        $_SESSION['id'] = $userId;
-        header("Location: profile");
-    }
-
     public function register() {
         if ($this->isLogged()) {
-            if ($_SERVER['REQUEST_URI'] == "/") {
-                header("Location: users/profile");
-            } else {
-                header("Location: profile");
-            }
+            header("Location: /users/profile");
             exit();
         }
 
-        $viewModel = new RegisterInformation();
+        $viewModel = new RegisterInformationViewModel();
 
         if (isset($_POST['username'], $_POST['password'], $_POST['firstName'], $_POST['lastName'])) {
             try {
@@ -62,7 +47,11 @@ class UsersController extends Controller
                 $firstName = $_POST['firstName'];
                 $lastName = $_POST['lastName'];
 
-                $userModel = new User();
+                $userModel = new UserModel();
+                if ($userModel->exists($user)) {
+                    throw new \Exception("User already registered");
+                }
+
                 $userModel->register($user, $password, $firstName, $lastName);
 
                 $this->initLogin($user, $password);
@@ -77,14 +66,14 @@ class UsersController extends Controller
 
     public function profile() {
         if (!$this->isLogged()) {
-            header("Location: login");
+            header("Location: /users/login");
             exit();
         }
 
-        $userModel = new User();
+        $userModel = new UserModel();
         $userInfo = $userModel->getInfo($_SESSION['id']);
 
-        $userViewModel = new \ShoppingCart\ViewModels\User(
+        $userViewModel = new UserViewModel(
             $userInfo['username'],
             $userInfo['password'],
             $userInfo['id'],
@@ -99,17 +88,10 @@ class UsersController extends Controller
                 return new View($userViewModel);
             }
 
-            if ($userModel->edit(
-                $_POST['username'],
-                $_POST['password'],
-                $_SESSION['id']
-            )
-            ) {
+            if ($userModel->edit($_POST['username'], $_POST['password'], $_SESSION['id'])) {
                 $userViewModel->success = 1;
                 $userViewModel->setUsername($_POST['username']);
                 $userViewModel->setPassword($_POST['password']);
-
-                return new View($userViewModel);
             }
 
             $userViewModel->error = 1;
@@ -121,12 +103,24 @@ class UsersController extends Controller
 
     public function logout() {
         if (!$this->isLogged()) {
-            header("Location: profile");
+            header("Location: /users/profile");
             exit();
         }
 
-        unset($_SESSION['id']);
-        header("Location: login");
+        session_destroy();
+        header("Location: /users/login");
         exit();
+    }
+
+    private function initLogin($user, $pass) {
+        $userModel = new UserModel();
+
+        $userId = $userModel->login($user, $pass);
+        $_SESSION['id'] = $userId;
+
+        $userRoles = $userModel->getUserRoles($userId);
+        $_SESSION['roles'] = $userRoles;
+
+        header("Location: profile");
     }
 }

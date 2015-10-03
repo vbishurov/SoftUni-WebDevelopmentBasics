@@ -2,7 +2,7 @@
 
 namespace ShoppingCart\ViewModels;
 
-class RegisterInformation
+class LoginInformationViewModel
 {
     public $error = false;
     public $success = false;

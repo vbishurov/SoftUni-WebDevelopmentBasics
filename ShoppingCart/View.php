@@ -45,6 +45,4 @@ class View
                 . $view
                 . self::VIEW_EXTENSION;
     }
-
-
 }

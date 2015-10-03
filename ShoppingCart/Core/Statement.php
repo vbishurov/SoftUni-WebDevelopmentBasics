@@ -18,7 +18,7 @@ class Statement
         return $this->statement->fetchAll($fetchStyle);
     }
 
-    public function bindParam($parameter, &$variable, $dataType = \PDO::PARAM_STR, $length = null, $driverOptions = null) {
+    public function bindParam($parameter, $variable, $dataType = \PDO::PARAM_STR, $length = null, $driverOptions = null) {
         return $this->statement->bindParam($parameter, $variable, $dataType, $length, $driverOptions);
     }
 
