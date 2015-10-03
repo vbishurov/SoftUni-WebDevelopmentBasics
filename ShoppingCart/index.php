@@ -7,11 +7,8 @@ if (isset($_SESSION['id'])) : ?>
         <li><a href="/products/all">View products</a></li>
         <li><a href="/shoppingcart/view">View cart</a></li>
         <li><a href="/users/logout">Logout</a></li>
-        <?php if (in_array(array('name' => 'editor'), $_SESSION['roles'])) : ?>
-            <li><a href="/admin/editor">Administration</a></li>
-            <?php
-        endif; ?>
-        <?php if (in_array(array('name' => 'administrator'), $_SESSION['roles'])) : ?>
+        <li><a href="/products/possessions">Possessions</a></li>
+        <?php if (in_array(array('name' => 'administrator'), $_SESSION['roles']) || in_array(array('name' => 'editor'), $_SESSION['roles'])) : ?>
             <li><a href="/admin/admin">Administration</a></li>
             <?php
         endif; ?>

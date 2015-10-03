@@ -3,8 +3,9 @@ foreach ($model as $product) : ?>
 
     Name: <?= $product->getName() ?><br>
     In stock: <?= $product->getQuantity() ?><br>
-    Price: $<?= $product->getPrice() ?><br><br>
+    Price: $<?= $product->getPrice() ?><br>
 
-    <a href="/product/sell/<?= $product->getId() ?>">Sell one</a> or <a href="/product/sell/<?= $product->getId() ?>/id">Sell all</a>
+    <a href="/products/sell/<?= $product->getId() ?>/1">Sell one</a> or <a href="/products/sell/<?= $product->getId() ?>/<?= $product->getQuantity() ?>">Sell all</a>
+    <br><br>
 
 <?php endforeach;

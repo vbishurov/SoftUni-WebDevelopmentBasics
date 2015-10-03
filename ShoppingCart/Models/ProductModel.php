@@ -35,15 +35,67 @@ class ProductModel extends Model
         return $this->prepareViewModel($result->fetchAll())[0];
     }
 
-    public function getPossessions($take, $skip) {
+    public function getPossessions($id, $take, $skip) {
         $result = $this->db->prepare("SELECT p.id, p.name, up.quantity, p.price FROM user_possessions up
                                             INNER JOIN products p
                                             ON up.product_id = p.id
-                                            WHERE user_id =  ?");
+                                            WHERE user_id =  ? AND up.quantity > 0
+                                            LIMIT ? OFFSET ?");
 
-        $result->execute([$_SESSION['id'], $take, $skip]);
+        $result->execute([$id, $take, $skip]);
 
         return $this->prepareViewModel($result->fetchAll());
+    }
+
+    public function sell($userId, $productId, $amount) {
+        $product = $this->details($productId);
+        $amountPossessed = $this->db->prepare("SELECT quantity FROM user_possessions WHERE product_id = ? AND user_id = ?");
+        $amountPossessed->execute([$productId, $userId]);
+        $amountPossessed = $amountPossessed->fetch();
+
+        if ($amount > $amountPossessed) {
+            throw new \Exception("You do not have $amount items from product $productId");
+        }
+
+        $this->db->beginTransaction();
+
+        $addMoney = $this->db->prepare("UPDATE users SET cash = cash + ? WHERE id = ?");
+        if (!$addMoney->execute([$product->getPrice(), $userId])) {
+            $this->db->rollback();
+            throw new \Exception("Cannot add money");
+        }
+
+        $removeFromPossessions = $this->db->prepare("UPDATE user_possessions SET quantity = quantity - ? WHERE user_id = ? AND product_id = ?");
+        if (!$removeFromPossessions->execute([$amount, $userId, $productId])) {
+            $this->db->rollback();
+            throw new \Exception("Could not remove from possessions");
+        }
+
+        $addToProducts = $this->db->prepare("UPDATE products SET quantity = quantity + ? WHERE id = ?");
+        if (!$addToProducts->execute([$amount, $productId])) {
+            $this->db->rollback();
+            throw new \Exception("Could not add to products");
+        }
+
+        $this->db->commit();
+    }
+
+    public function add($name, $quantity, $price) {
+        $result = $this->db->prepare("INSERT INTO products (name, quantity, price) VALUES (?, ?, ?)");
+        if (!$result->execute([$name, $quantity, $price])) {
+            throw new \Exception("Unable to create product $name");
+        }
+    }
+
+    public function delete($productId) {
+        if (!$this->exists($productId)) {
+            throw new \Exception("Product $productId does not exist");
+        }
+
+        $result = $this->db->prepare("DELETE FROM products WHERE id = ?");
+        if (!$result->execute([$productId])) {
+            throw new \Exception("Unable to delete product $productId");
+        }
     }
 
     public function exists($id) {
@@ -67,5 +119,16 @@ class ProductModel extends Model
         }
 
         return $viewModel;
+    }
+
+    public function changeStock($productId, $newQuantity) {
+        if (!$this->exists($productId)) {
+            throw new \Exception("Product $productId does not exist");
+        }
+
+        $result = $this->db->prepare("UPDATE products SET quantity = ? WHERE id = ?");
+        if (!$result->execute([$newQuantity, $productId])) {
+            throw new \Exception("Unable to update quantity of product $productId");
+        }
     }
 }

@@ -4,8 +4,7 @@ namespace ShoppingCart\Controllers;
 use ShoppingCart\Models\ProductModel;
 use ShoppingCart\Models\CartModel;
 use ShoppingCart\View;
-use ShoppingCart\ViewModels\ProductAddInformationViewModel;
-use ShoppingCart\ViewModels\CartCheckoutInformationViewModel;
+use ShoppingCart\ViewModels\InformationViewModel;
 
 class ShoppingCartController extends Controller
 {
@@ -23,28 +22,26 @@ class ShoppingCartController extends Controller
         $userId = (string)$_SESSION['id'];
 
         $product = new ProductModel();
-        $viewModel = new ProductAddInformationViewModel();
+        $viewModel = new InformationViewModel();
 
         if (!$product->exists($productId)) {
             $viewModel->error = "Product $productId does not exist";
-            return new View($viewModel);
         }
 
         $quantityAvailable = $product->details($productId)->getQuantity();
 
         if ($quantityWanted > $quantityAvailable) {
             $viewModel->error = "Not enough stock";
-            return new View($viewModel);
         }
 
         $shoppingCart = new CartModel();
         if ($shoppingCart->add($userId, $productId, $quantityWanted)) {
             $viewModel->success = "Product $productId added to cart successfully";
-            return new View($viewModel);
         } else {
             $viewModel->error = "Cannot add product $productId to cart";
-            return new View($viewModel);
         }
+
+        return new View($viewModel);
     }
 
     public function view() {
@@ -71,17 +68,16 @@ class ShoppingCartController extends Controller
         }
 
         $shoppingCartModel = new CartModel();
-        $viewModel = new CartCheckoutInformationViewModel();
+        $viewModel = new InformationViewModel();
 
         try{
             $shoppingCartModel->checkout($_SESSION['id']);
 
             $viewModel->success = "Products bough successfully";
-
-            return new View($viewModel);
         } catch (\Exception $e) {
             $viewModel->error = $e->getMessage();
-            return new View($viewModel);
         }
+
+        return new View($viewModel);
     }
 }

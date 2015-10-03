@@ -3,8 +3,7 @@ namespace ShoppingCart\Controllers;
 
 use ShoppingCart\Models\UserModel;
 use ShoppingCart\View;
-use ShoppingCart\ViewModels\LoginInformationViewModel;
-use ShoppingCart\ViewModels\RegisterInformationViewModel;
+use ShoppingCart\ViewModels\InformationViewModel;
 use ShoppingCart\ViewModels\UserViewModel;
 
 class UsersController extends Controller
@@ -15,7 +14,7 @@ class UsersController extends Controller
             exit();
         }
 
-        $viewModel = new LoginInformationViewModel();
+        $viewModel = new InformationViewModel();
 
         if (isset($_POST['username'], $_POST['password'])) {
             try {
@@ -38,7 +37,7 @@ class UsersController extends Controller
             exit();
         }
 
-        $viewModel = new RegisterInformationViewModel();
+        $viewModel = new InformationViewModel();
 
         if (isset($_POST['username'], $_POST['password'], $_POST['firstName'], $_POST['lastName'])) {
             try {
